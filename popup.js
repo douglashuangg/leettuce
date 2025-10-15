@@ -5,6 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Update username title
   updateUsernameTitle();
+  
+  // Random difficulty selection
+  setRandomDifficulty();
 
   // Tab switching
   const tabs = Array.from(document.querySelectorAll('.tab'));
@@ -133,7 +136,8 @@ function loadStats() {
     if (goodEl) goodEl.textContent = good;
     const reviewSoonEl = document.getElementById('reviewSoon');
     if (reviewSoonEl) reviewSoonEl.textContent = reviewSoon;
-    document.getElementById('needReview').textContent = needReview;
+    const needReviewEl = document.getElementById('needReview');
+    if (needReviewEl) needReviewEl.textContent = needReview;
     
     // Update last updated
     // Update status message
@@ -184,5 +188,29 @@ function updateLineNumbers() {
     html += i + '<br>';
   }
   lineContainer.innerHTML = html;
+}
+
+function setRandomDifficulty() {
+  const difficulties = [
+    { name: 'Easy', class: 'easy', weight: 60 },
+    { name: 'Medium', class: 'medium', weight: 30 },
+    { name: 'Hard', class: 'hard', weight: 10 }
+  ];
+  
+  const pill = document.getElementById('difficultyPill');
+  if (!pill) return;
+  
+  // Weighted random selection
+  const totalWeight = difficulties.reduce((sum, diff) => sum + diff.weight, 0);
+  let random = Math.random() * totalWeight;
+  
+  for (const diff of difficulties) {
+    random -= diff.weight;
+    if (random <= 0) {
+      pill.textContent = diff.name;
+      pill.className = `pill ${diff.class}`;
+      break;
+    }
+  }
 }
 

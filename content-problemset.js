@@ -546,12 +546,12 @@ function colorProblemRows(problemMap) {
       borderColor = '#FFC107';
       textNote = '🟡 Review soon';
     } else if (daysSince <= 90) {
-      backgroundColor = 'rgba(244, 67, 54, 0.2)'; // Red - Review Soon
-      borderColor = '#F44336';
+      backgroundColor = 'rgba(185, 28, 28, 0.2)'; // Dark Red - Review Soon
+      borderColor = '#B91C1C';
       textNote = '🔴 Review needed';
     } else {
-      backgroundColor = 'rgba(121, 85, 72, 0.2)'; // Brown - Rotting
-      borderColor = '#795548';
+      backgroundColor = 'rgba(141, 110, 99, 0.2)'; // Light Brown - Rotting
+      borderColor = '#8D6E63';
       textNote = '🤎 Rotting';
     }
     
