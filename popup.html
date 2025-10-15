@@ -3,147 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LeetCode Problem Freshness</title>
+    <title>Leettuce</title>
     <style>
+        :root {
+            --vscode-bg: #1e1e1e;
+            --vscode-panel: #252526;
+            --vscode-activity: #333333;
+            --vscode-titlebar: #3c3c3c;
+            --vscode-border: #2d2d2d;
+            --vscode-accent: #0e639c;
+            --vscode-accent-2: #007acc;
+            --vscode-fg: #cccccc;
+            --vscode-fg-muted: #9da2a6;
+            --vscode-green: #4caf50;
+            --vscode-red: #f44336;
+            --vscode-yellow: #ffc107;
+            --vscode-brown: #795548;
+            --vscode-editor-bg: #1e1e1e;
+            --vscode-editor-line: #2a2a2a;
+        }
         body {
             width: 350px;
-            padding: 20px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             margin: 0;
+            color: var(--vscode-fg);
+            background: var(--vscode-bg);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+            font-size: 12px;
         }
-        h2 {
-            margin: 0 0 16px 0;
-            font-size: 18px;
-            color: #333;
-        }
-        .stat {
+        .vscode {
             display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
+            flex-direction: column;
+            height: 520px;
+            border: 1px solid var(--vscode-border);
+            box-shadow: 0 6px 24px rgba(0,0,0,0.5);
         }
-        .stat:last-child {
-            border-bottom: none;
-        }
-        .label {
-            color: #666;
-        }
-        .value {
-            font-weight: 600;
-            color: #333;
-        }
-        .button {
-            width: 100%;
-            padding: 12px;
-            background: #003D99;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 16px;
-            transition: all 0.2s;
-        }
-        .button:hover:not(:disabled) {
-            background: #002D66;
-        }
-        .button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-        .button-secondary {
-            background: #f5f5f5;
-            color: #333;
-        }
-        .button-secondary:hover {
-            background: #e0e0e0;
-        }
-        .legend {
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid #eee;
-        }
-        .legend-item {
+        .titlebar {
+            height: 28px;
+            background: linear-gradient(#3c3c3c, #2e2e2e);
+            border-bottom: 1px solid var(--vscode-border);
             display: flex;
             align-items: center;
-            margin: 8px 0;
-            font-size: 13px;
+            justify-content: space-between;
+            padding: 0 8px;
+            letter-spacing: 0.3px;
         }
-        .legend-color {
-            width: 16px;
-            height: 16px;
-            border-radius: 4px;
-            margin-right: 8px;
+        .titlebar .title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
         }
-        .status {
-            padding: 12px;
-            background: #f5f5f5;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-size: 13px;
-            color: #666;
+        .traffic {
+            display: flex;
+            gap: 6px;
         }
-        .status.success {
-            background: #e8f5e9;
-            color: #2e7d32;
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27c93f; }
+        .tabbar {
+            height: 34px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            background: linear-gradient(#2a2a2a, #222);
+            border-bottom: 1px solid #000;
+            box-shadow: inset 0 -1px 0 rgba(255,255,255,0.04);
+            padding: 0 6px;
         }
-        .instructions {
-            font-size: 12px;
-            color: #666;
-            margin-top: 16px;
-            padding: 12px;
-            background: #fff3e0;
-            border-radius: 8px;
-            border-left: 3px solid #ff9800;
+        .tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            height: 24px;
+            padding: 0 10px;
+            border-radius: 4px 4px 0 0;
+            color: var(--vscode-fg-muted);
+            cursor: pointer;
+            user-select: none;
+            border: 1px solid transparent;
         }
+        .tab:hover {
+            background: #2e2e2e;
+            color: var(--vscode-fg);
+            border-color: var(--vscode-border);
+        }
+        .tab.active {
+            background: var(--vscode-bg);
+            color: var(--vscode-fg);
+            border: 1px solid var(--vscode-border);
+            border-bottom-color: var(--vscode-bg);
+            border-top-color: var(--vscode-accent-2);
+            border-top-width: 2px;
+            font-weight: 600;
+        }
+        .editor {
+            flex: 1;
+            background: var(--vscode-editor-bg);
+            position: relative;
+            overflow: hidden;
+        }
+        .gutter {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 36px;
+            background: var(--vscode-panel);
+            border-right: 1px solid var(--vscode-border);
+            color: var(--vscode-fg-muted);
+            text-align: right;
+            padding-top: 8px;
+            line-height: 20px;
+        }
+        .content {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 36px;
+            right: 0;
+            padding: 8px 12px 12px 12px;
+            overflow-y: auto;
+        }
+        .line { border-bottom: 1px solid var(--vscode-editor-line); }
+        .kv { display: flex; justify-content: space-between; padding: 6px 0; }
+        .key { color: var(--vscode-fg-muted); }
+        .val { color: var(--vscode-fg); font-weight: 600; }
+        .val.green { color: var(--vscode-green); }
+        .val.red { color: var(--vscode-red); }
+        .val.yellow { color: var(--vscode-yellow); }
+        .panel { display: none; }
+        .panel.active { display: block; }
+        .legend-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; }
+        .legend-color { width: 12px; height: 12px; border-radius: 3px; }
+        .hint { color: var(--vscode-fg-muted); margin-top: 8px; }
+        .statusbar {
+            height: 22px;
+            background: var(--vscode-activity);
+            border-top: 1px solid var(--vscode-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 8px;
+            font-size: 11px;
+            color: var(--vscode-fg-muted);
+        }
+        .status-left, .status-right { display: flex; align-items: center; gap: 10px; }
+        .accent { color: var(--vscode-accent-2); }
+        a { color: var(--vscode-accent-2); text-decoration: none; }
+        a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
-    <h2 id="usernameTitle">Loading...</h2>
-    
-    <div class="stat">
-        <span class="label">Problems Tracked:</span>
-        <span class="value" id="totalProblems">0</span>
+    <div class="vscode">
+        <div class="titlebar">
+            <div class="title">
+                <div class="traffic">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
     </div>
-    <div class="stat">
-        <span class="label">Need Review (90+ days):</span>
-        <span class="value" id="needReview" style="color: #F44336;">0</span>
+                <span id="usernameTitle">Leettuce</span>
     </div>
-    <div class="stat">
-        <span class="label">Fresh (0-7 days):</span>
-        <span class="value" id="fresh" style="color: #4CAF50;">0</span>
+            <div class="title">
+                <span class="accent">leettuce</span>
     </div>
-    
-    
-    <div class="legend">
-        <strong style="font-size: 13px;">Color Legend:</strong>
-        <div class="legend-item">
-            <div class="legend-color" style="background: rgba(76, 175, 80, 0.5);"></div>
-            <span>Fresh (0-7 days)</span>
         </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background: rgba(255, 193, 7, 0.5);"></div>
-            <span>Good (7-30 days)</span>
+        <div class="tabbar">
+            <div class="tab active" data-target="panel-stats">stats.json</div>
+            <div class="tab" data-target="panel-legend">legend.ts</div>
+            <div class="tab" data-target="panel-help">README.md</div>
         </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background: rgba(244, 67, 54, 0.5);"></div>
-            <span>Review Soon (30-90 days)</span>
+        <div class="editor">
+            <div class="gutter" id="lineNumbers">
+                1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10
+            </div>
+            <div class="content">
+                <div class="panel active" id="panel-stats">
+                    <div class="kv line"><span class="key">Problems tracked</span><span class="val" id="totalProblems">0</span></div>
+                    <div class="kv line"><span class="key">Fresh (0–7 days)</span><span class="val green" id="fresh">0</span></div>
+                    <div class="kv line"><span class="key">Good (7–30 days)</span><span class="val yellow" id="good">0</span></div>
+                    <div class="kv line"><span class="key">Review soon (30–90 days)</span><span class="val" id="reviewSoon">0</span></div>
+                    <div class="kv line"><span class="key">Need review (90+ days)</span><span class="val red" id="needReview">0</span></div>
+                    <div class="hint" id="status"></div>
+                </div>
+                <div class="panel" id="panel-legend">
+                    <div class="legend-item"><div class="legend-color" style="background: rgba(76, 175, 80, 0.6);"></div><span>Fresh (0-7 days)</span></div>
+                    <div class="legend-item"><div class="legend-color" style="background: rgba(255, 193, 7, 0.6);"></div><span>Good (7-30 days)</span></div>
+                    <div class="legend-item"><div class="legend-color" style="background: rgba(244, 67, 54, 0.6);"></div><span>Review Soon (30-90 days)</span></div>
+                    <div class="legend-item"><div class="legend-color" style="background: rgba(121, 85, 72, 0.6);"></div><span>Rotting (90+ days)</span></div>
+                </div>
+                <div class="panel" id="panel-help">
+                    <div>
+                        <div>// How to use</div>
+                        <div>1. Open <a href="https://leetcode.com/problemset/" target="_blank">leetcode problemset</a></div>
+                        <div>2. Ensure you are logged in</div>
+                        <div>3. Problems get color-coded automatically</div>
+                        <div class="hint">Note: Must be on LeetCode to sync.</div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background: rgba(121, 85, 72, 0.5);"></div>
-            <span>Rotting (90+ days)</span>
+        <div class="statusbar">
+            <div class="status-left">
+                <span>UTF-8</span>
+                <span>LF</span>
+                <span>Spaces: 2</span>
+            </div>
+            <div class="status-right">
+                <span class="accent">Leettuce</span>
+            </div>
         </div>
-    </div>
-    
-    <div class="instructions">
-        <strong>How to use:</strong><br>
-        1. Go to <strong><a href="https://leetcode.com/problemset/" target="_blank">leetcode.com/problemset</a></strong><br>
-        2. Make sure you're logged in<br>
-        3. Colored problems will appear automatically!<br>
-        <br>
-        <small style="color: #999;">Note: Must be on LeetCode to sync.</small>
     </div>
     
     <script src="popup.js"></script>

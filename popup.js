@@ -5,6 +5,26 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Update username title
   updateUsernameTitle();
+
+  // Tab switching
+  const tabs = Array.from(document.querySelectorAll('.tab'));
+  const panels = Array.from(document.querySelectorAll('.panel'));
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      const target = tab.getAttribute('data-target');
+      const panel = document.getElementById(target);
+      if (panel) panel.classList.add('active');
+    });
+  });
+
+  // Simple line numbers grow as content height changes
+  updateLineNumbers();
+  const content = document.querySelector('.content');
+  const observer = new ResizeObserver(() => updateLineNumbers());
+  if (content) observer.observe(content);
 });
 
 async function syncData() {
@@ -93,25 +113,36 @@ function loadStats() {
     
     // Calculate freshness categories
     const now = Date.now();
-    let fresh = 0, needReview = 0;
+    let fresh = 0, good = 0, reviewSoon = 0, needReview = 0;
     
     problems.forEach(problem => {
       const daysSince = Math.floor((now - problem.timestamp * 1000) / (1000 * 60 * 60 * 24));
-      if (daysSince <= 7) fresh++;
-      if (daysSince >= 90) needReview++;
+      if (daysSince <= 7) {
+        fresh++;
+      } else if (daysSince <= 30) {
+        good++;
+      } else if (daysSince < 90) {
+        reviewSoon++;
+      } else {
+        needReview++;
+      }
     });
     
     document.getElementById('fresh').textContent = fresh;
+    const goodEl = document.getElementById('good');
+    if (goodEl) goodEl.textContent = good;
+    const reviewSoonEl = document.getElementById('reviewSoon');
+    if (reviewSoonEl) reviewSoonEl.textContent = reviewSoon;
     document.getElementById('needReview').textContent = needReview;
     
     // Update last updated
     // Update status message
     if (problems.length === 0) {
-      document.getElementById('status').textContent = 'No data yet. Auto-sync in progress...';
-      document.getElementById('status').className = 'status';
+      const statusEl = document.getElementById('status');
+      if (statusEl) statusEl.textContent = 'No data yet. Auto-sync in progress...';
     } else {
-      document.getElementById('status').textContent = '';
-      document.getElementById('status').className = 'status';
+      const statusEl = document.getElementById('status');
+      if (statusEl) statusEl.textContent = '';
     }
   });
 }
@@ -140,5 +171,18 @@ function getTimeAgo(timestamp) {
   if (seconds < 3600) return Math.floor(seconds / 60) + ' min ago';
   if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours ago';
   return Math.floor(seconds / 86400) + ' days ago';
+}
+
+function updateLineNumbers() {
+  const lineContainer = document.getElementById('lineNumbers');
+  const content = document.querySelector('.content');
+  if (!lineContainer || !content) return;
+  const lineHeight = 20; // matches CSS line-height
+  const visibleLines = Math.ceil(content.scrollHeight / lineHeight);
+  let html = '';
+  for (let i = 1; i <= Math.max(10, visibleLines); i++) {
+    html += i + '<br>';
+  }
+  lineContainer.innerHTML = html;
 }
 
