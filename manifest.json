@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "Leettuce",
+  "version": "1.0",
+  "description": "Colors LeetCode problems based on how recently you solved them - spaced repetition for coding!",
+  "permissions": [
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://leetcode.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://leetcode.com/problemset/*", "https://leetcode.com/problems/*"],
+      "js": ["content-problemset.js"],
+      "css": ["styles.css"],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
+
