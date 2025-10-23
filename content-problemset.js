@@ -28,36 +28,16 @@ chrome.storage.local.get(['problemData', 'lastUpdated', 'username'], (result) =>
   }
 });
 
-// Event-driven SPA navigation detection
+// Simple URL change detection
 let currentUrl = location.href;
-
-// Override History API methods
-const originalPushState = history.pushState;
-const originalReplaceState = history.replaceState;
-
-history.pushState = function(...args) {
-  originalPushState.apply(history, args);
-  window.dispatchEvent(new PopStateEvent('popstate'));
-};
-
-history.replaceState = function(...args) {
-  originalReplaceState.apply(history, args);
-  window.dispatchEvent(new PopStateEvent('popstate'));
-};
-
-// Listen for navigation events
-window.addEventListener('popstate', () => {
-  const newUrl = location.href;
-  if (newUrl !== currentUrl) {
-    currentUrl = newUrl;
-    
-    if (newUrl.includes('/problemset/') || newUrl.includes('/problems/')) {
-        setTimeout(() => {
-        autoSync();
-      }, 1500);
+setInterval(() => {
+  if (location.href !== currentUrl) {
+    currentUrl = location.href;
+    if (currentUrl.includes('/problemset/') || currentUrl.includes('/problems/')) {
+      setTimeout(() => autoSync(), 1500);
     }
   }
-});
+}, 1000);
 
 // Auto-sync function
 async function autoSync() {
@@ -92,20 +72,18 @@ function applyColors() {
   
   colorProblemRows(problemMap);
   
-  // Use MutationObserver for dynamic content
-  const observer = new MutationObserver(() => {
-    colorProblemRows(problemMap);
-  });
-  
-  const targetNode = document.querySelector('[role="rowgroup"]') || document.body;
-  observer.observe(targetNode, {
-    childList: true,
-    subtree: true
-  });
+  // Simple observer for dynamic content
+  const observer = new MutationObserver(() => colorProblemRows(problemMap));
+  observer.observe(document.body, { childList: true, subtree: true });
 }
 
 function colorProblemRows(problemMap) {
   const problemLinks = document.querySelectorAll('a[href*="/problems/"]');
+  
+  // Get current problem slug from URL
+  const currentUrl = window.location.href;
+  const currentMatch = currentUrl.match(/\/problems\/([^\/]+)/);
+  const currentProblemSlug = currentMatch ? currentMatch[1] : null;
   
   problemLinks.forEach(link => {
     const href = link.getAttribute('href');
@@ -113,6 +91,12 @@ function colorProblemRows(problemMap) {
     if (!match) return;
     
     const problemSlug = match[1];
+    
+    // Don't color the current problem if we're on the problem page
+    if (currentProblemSlug && problemSlug === currentProblemSlug) {
+      return;
+    }
+    
     const problemInfo = problemMap.get(problemSlug);
     if (!problemInfo) return;
     
@@ -138,14 +122,34 @@ function colorProblemRows(problemMap) {
       borderColor = '#8D6E63';
     }
     
-    // Apply styling
-    if (link.dataset.colored !== problemSlug) {
-      link.dataset.colored = problemSlug;
-      link.style.setProperty('background-color', backgroundColor, 'important');
-      link.style.setProperty('border-left', `5px solid ${borderColor}`, 'important');
-      link.style.transition = 'all 0.2s ease';
+    // Find the appropriate parent container based on page type
+    let parentRow;
+    
+    // For study plan pages - target the outer container with border-b
+    if (link.closest('div[class*="border-b"]')) {
+      parentRow = link.closest('div[class*="border-b"]');
+    }
+    // For problemset pages - color the link itself (original behavior)
+    else if (window.location.href.includes('/problemset/')) {
+      parentRow = link; // Color the link directly
+    }
+    // Fallback for other pages
+    else {
+      parentRow = link.closest('div[class*="item"]') ||
+                  link.closest('div[class*="card"]') ||
+                  link.closest('div[class*="problem"]') ||
+                  link.parentElement?.parentElement ||
+                  link.parentElement;
+    }
+    
+    // Apply styling to the parent container (whole div)
+    if (parentRow && parentRow.dataset.colored !== problemSlug) {
+      parentRow.dataset.colored = problemSlug;
+      parentRow.style.setProperty('background-color', backgroundColor, 'important');
+      parentRow.style.setProperty('border-left', `5px solid ${borderColor}`, 'important');
+      parentRow.style.transition = 'all 0.2s ease';
       
-      // Add freshness indicator
+      // Add freshness indicator to the link
     if (!link.querySelector('.freshness-indicator')) {
       const indicator = document.createElement('span');
       indicator.className = 'freshness-indicator';
@@ -163,11 +167,26 @@ function colorProblemRows(problemMap) {
         box-shadow: 0 2px 4px rgba(0,0,0,0.15);
       `;
       
-      const percentElement = link.querySelector('[class*="text-sm"]:not(.freshness-indicator)');
-      if (percentElement && percentElement.textContent.includes('%')) {
-        percentElement.parentElement.insertBefore(indicator, percentElement);
-      } else {
-        link.appendChild(indicator);
+        // For study plan pages, place indicator to the right of the title
+        if (window.location.href.includes('/study-plan/') || link.closest('div[class*="border-b"]')) {
+          // Find the title div in the parent container
+          const parentContainer = link.closest('div[class*="flex"]') || link.parentElement;
+          const titleDiv = parentContainer.querySelector('div[class*="text-body"]');
+          
+          if (titleDiv) {
+            // Insert right after the title div
+            titleDiv.parentElement.insertBefore(indicator, titleDiv.nextSibling);
+          } else {
+            link.appendChild(indicator);
+          }
+        } else {
+          // For problemset pages, use the original logic
+          const percentElement = link.querySelector('[class*="text-sm"]:not(.freshness-indicator)');
+          if (percentElement && percentElement.textContent.includes('%')) {
+            percentElement.parentElement.insertBefore(indicator, percentElement);
+          } else {
+            link.appendChild(indicator);
+          }
         }
       }
     }
