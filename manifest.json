@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Leettuce",
   "version": "1.0",
-  "description": "Colors LeetCode problems based on how recently you solved them - spaced repetition for coding!",
+  "description": "Colors LeetCode problems based on how recently you solved them. Now you can see how fresh (or rotted) your LeetCode is.",
   "permissions": [
     "storage",
     "tabs"
@@ -15,7 +15,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://leetcode.com/problemset/*", "https://leetcode.com/problems/*"],
+      "matches": ["https://leetcode.com/*"],
       "js": ["content-problemset.js"],
       "css": ["styles.css"],
       "run_at": "document_end"
