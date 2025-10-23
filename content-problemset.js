@@ -37,7 +37,7 @@ setInterval(() => {
       setTimeout(() => autoSync(), 1500);
     }
   }
-}, 1000);
+        }, 1000);
 
 // Auto-sync function
 async function autoSync() {
@@ -78,7 +78,7 @@ function applyColors() {
 }
 
 function colorProblemRows(problemMap) {
-  const problemLinks = document.querySelectorAll('a[href*="/problems/"]');
+  const problemLinks = document.querySelectorAll('a[href*="/problems/"]:not([href*="envType=daily-question"])');
   
   // Get current problem slug from URL
   const currentUrl = window.location.href;
@@ -181,11 +181,11 @@ function colorProblemRows(problemMap) {
           }
         } else {
           // For problemset pages, use the original logic
-          const percentElement = link.querySelector('[class*="text-sm"]:not(.freshness-indicator)');
-          if (percentElement && percentElement.textContent.includes('%')) {
-            percentElement.parentElement.insertBefore(indicator, percentElement);
-          } else {
-            link.appendChild(indicator);
+      const percentElement = link.querySelector('[class*="text-sm"]:not(.freshness-indicator)');
+      if (percentElement && percentElement.textContent.includes('%')) {
+        percentElement.parentElement.insertBefore(indicator, percentElement);
+      } else {
+        link.appendChild(indicator);
           }
         }
       }
