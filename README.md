@@ -6,12 +6,12 @@ Install here: https://chromewebstore.google.com/detail/leettuce/omhblffgppgepaek
 
 
 
-
+&nbsp;
 
 
 <img width="1052" height="793" alt="image" src="https://github.com/user-attachments/assets/62ff67af-1ad0-46c9-9b34-923e0ff5b1d5" />
 
-
+&nbsp;
 <img width="386" height="362" alt="leettuce_shot2" src="https://github.com/user-attachments/assets/c392e39f-4f93-4731-acd4-9e0e26b9dd3f" />
 
 
