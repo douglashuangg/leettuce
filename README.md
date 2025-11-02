@@ -1,6 +1,12 @@
 # Leettuce - Chrome Extension
 
-A Chrome extension shows how fresh (or rotted) your Leetcode is
+A Chrome extension shows how fresh (or rotted) your Leetcode is.
+
+Install here: https://chromewebstore.google.com/detail/leettuce/omhblffgppgepaeknllalechniimgcmo?authuser=0&hl=en
+
+
+
+
 
 
 <img width="1518" height="857" alt="image" src="https://github.com/user-attachments/assets/1921964d-c614-4fb8-be0f-63c2e0a4f754" />
@@ -10,6 +16,6 @@ A Chrome extension shows how fresh (or rotted) your Leetcode is
 
 
 
-Install here: https://chromewebstore.google.com/detail/leettuce/omhblffgppgepaeknllalechniimgcmo?authuser=0&hl=en
+
 
 
