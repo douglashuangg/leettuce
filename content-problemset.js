@@ -62,6 +62,93 @@ async function autoSync() {
   }
 }
 
+// Detect if page is in dark mode
+function isDarkMode() {
+  // Check prefers-color-scheme media query
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    return true;
+  }
+  
+  // Check for LeetCode dark mode indicators
+  // LeetCode uses data-theme attribute or dark class
+  if (document.documentElement.getAttribute('data-theme') === 'dark') {
+    return true;
+  }
+  if (document.documentElement.classList.contains('dark')) {
+    return true;
+  }
+  
+  // Check computed background color as fallback
+  const bgColor = window.getComputedStyle(document.body).backgroundColor;
+  const rgb = bgColor.match(/\d+/g);
+  if (rgb && rgb.length >= 3) {
+    const brightness = (parseInt(rgb[0]) + parseInt(rgb[1]) + parseInt(rgb[2])) / 3;
+    return brightness < 128; // Dark if average RGB < 128
+  }
+  
+  return false;
+}
+
+// Darken a hex color for better contrast
+function darkenColor(hex, percent = 20) {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const r = Math.max(0, Math.floor((num >> 16) * (100 - percent) / 100));
+  const g = Math.max(0, Math.floor(((num >> 8) & 0x00FF) * (100 - percent) / 100));
+  const b = Math.max(0, Math.floor((num & 0x0000FF) * (100 - percent) / 100));
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+}
+
+// Get colors based on freshness and theme
+function getColorsForTheme(daysSince, isDark) {
+  if (isDark) {
+    // Dark mode colors - gradients with solid colors (not peachy)
+    if (daysSince <= 7) {
+      return {
+        backgroundColor: 'linear-gradient(90deg, rgba(56, 142, 60, 0.4) 0%, rgba(76, 175, 80, 0.1) 100%)',
+        borderColor: '#66BB6A'
+      };
+    } else if (daysSince <= 30) {
+      return {
+        backgroundColor: 'linear-gradient(90deg, rgba(255, 183, 77, 0.3) 0%, rgba(255, 193, 7, 0.1) 100%)',
+        borderColor: '#FFB74D'
+      };
+    } else if (daysSince <= 90) {
+      return {
+        backgroundColor: 'linear-gradient(90deg, rgba(183, 28, 28, 0.3) 0%, rgba(239, 83, 80, 0.1) 100%)',
+        borderColor: '#E57373'
+      };
+    } else {
+      return {
+        backgroundColor: 'linear-gradient(90deg, rgba(121, 85, 72, 0.4) 0%, rgba(121, 85, 72, 0.1) 100%)',
+        borderColor: '#795548'
+      };
+    }
+  } else {
+    // Light mode colors - original colors
+    if (daysSince <= 7) {
+      return {
+        backgroundColor: 'rgba(76, 175, 80, 0.2)',
+        borderColor: '#4CAF50'
+      };
+    } else if (daysSince <= 30) {
+      return {
+        backgroundColor: 'rgba(255, 193, 7, 0.2)',
+        borderColor: '#FFC107'
+      };
+    } else if (daysSince <= 90) {
+      return {
+        backgroundColor: 'rgba(185, 28, 28, 0.2)',
+        borderColor: '#B91C1C'
+      };
+    } else {
+      return {
+        backgroundColor: 'rgba(141, 110, 99, 0.2)',
+        borderColor: '#8D6E63'
+      };
+    }
+  }
+}
+
 function applyColors() {
   if (problemData.length === 0) return;
   
@@ -105,22 +192,11 @@ function colorProblemRows(problemMap) {
     const now = new Date();
     const daysSince = Math.floor((now - completedDate) / (1000 * 60 * 60 * 24));
     
-    // Determine color based on freshness
-    let backgroundColor, borderColor;
-    
-    if (daysSince <= 7) {
-      backgroundColor = 'rgba(76, 175, 80, 0.2)';
-      borderColor = '#4CAF50';
-    } else if (daysSince <= 30) {
-      backgroundColor = 'rgba(255, 193, 7, 0.2)';
-      borderColor = '#FFC107';
-    } else if (daysSince <= 90) {
-      backgroundColor = 'rgba(185, 28, 28, 0.2)';
-      borderColor = '#B91C1C';
-    } else {
-      backgroundColor = 'rgba(141, 110, 99, 0.2)';
-      borderColor = '#8D6E63';
-    }
+    // Determine color based on freshness and theme
+    const isDark = isDarkMode();
+    const colors = getColorsForTheme(daysSince, isDark);
+    const backgroundColor = colors.backgroundColor;
+    const borderColor = colors.borderColor;
     
     // Find the appropriate parent container based on page type
     let parentRow;
@@ -143,29 +219,41 @@ function colorProblemRows(problemMap) {
     }
     
     // Apply styling to the parent container (whole div)
-    if (parentRow && parentRow.dataset.colored !== problemSlug) {
+    if (parentRow) {
+      // Always update colors (in case theme changed or extension was reloaded)
       parentRow.dataset.colored = problemSlug;
-      parentRow.style.setProperty('background-color', backgroundColor, 'important');
+      
+      // Check if backgroundColor is a gradient
+      if (backgroundColor.includes('gradient')) {
+        parentRow.style.setProperty('background-image', backgroundColor, 'important');
+        parentRow.style.setProperty('background-color', 'transparent', 'important');
+      } else {
+        parentRow.style.setProperty('background-color', backgroundColor, 'important');
+        parentRow.style.setProperty('background-image', 'none', 'important');
+      }
+      
       parentRow.style.setProperty('border-left', `5px solid ${borderColor}`, 'important');
       parentRow.style.transition = 'all 0.2s ease';
       
-      // Add freshness indicator to the link
-    if (!link.querySelector('.freshness-indicator')) {
-      const indicator = document.createElement('span');
-      indicator.className = 'freshness-indicator';
-      indicator.textContent = `${daysSince}d ago`;
+      // Add or update freshness indicator to the link
+      let indicator = link.querySelector('.freshness-indicator');
+      const darkerBorderColor = darkenColor(borderColor, 30);
+      if (!indicator) {
+        indicator = document.createElement('span');
+        indicator.className = 'freshness-indicator';
+        indicator.textContent = `${daysSince}d ago`;
         indicator.title = `Last solved: ${completedDate.toLocaleDateString()}`;
-      indicator.style.cssText = `
-        display: inline-block;
-        font-size: 11px;
-        padding: 3px 8px;
-        margin-right: 8px;
-        background: ${borderColor};
-        color: white;
-        border-radius: 10px;
-        font-weight: 700;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-      `;
+        indicator.style.cssText = `
+          display: inline-block;
+          font-size: 11px;
+          padding: 3px 8px;
+          margin-right: 8px;
+          background: ${darkerBorderColor};
+          color: white;
+          border-radius: 10px;
+          font-weight: 700;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        `;
       
         // For study plan pages, place indicator to the right of the title
         if (window.location.href.includes('/study-plan/') || link.closest('div[class*="border-b"]')) {
@@ -188,6 +276,10 @@ function colorProblemRows(problemMap) {
         link.appendChild(indicator);
           }
         }
+      } else {
+        // Update existing indicator with new colors (darker for better text readability)
+        const darkerBorderColor = darkenColor(borderColor, 30);
+        indicator.style.setProperty('background', darkerBorderColor, 'important');
       }
     }
   });

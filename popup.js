@@ -94,7 +94,6 @@ async function syncData() {
     });
     return; // Exit early since we're using callback
   } catch (error) {
-    console.error('Sync error:', error);
     statusEl.textContent = '✗ Error: ' + error.message;
     statusEl.className = 'status';
     syncButton.disabled = false;
@@ -156,14 +155,10 @@ function updateUsernameTitle() {
     const username = result.username;
     const titleEl = document.getElementById('usernameTitle');
     
-    console.log('🔍 Popup checking for username:', username);
-    
     if (username) {
       titleEl.textContent = `@${username}`;
-      console.log('✅ Username found:', username);
     } else {
       titleEl.textContent = 'Leettuce';
-      console.log('❌ No username found in storage');
     }
   });
 }

@@ -2,7 +2,7 @@
 
 // Listen for installation
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('LeetCode Problem Freshness installed!');
+  // Extension installed
 });
 
 // Listen for messages from content scripts
@@ -13,7 +13,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       problemData: request.data,
       lastUpdated: Date.now()
     }, () => {
-      console.log('Progress data saved:', request.data.length, 'problems');
       sendResponse({ success: true });
     });
     return true; // Will respond asynchronously
