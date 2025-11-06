@@ -10,6 +10,7 @@ Install here: https://chromewebstore.google.com/detail/leettuce/omhblffgppgepaek
 
 
 <img width="1052" height="793" alt="image" src="https://github.com/user-attachments/assets/62ff67af-1ad0-46c9-9b34-923e0ff5b1d5" />
+<img width="1060" height="663" alt="image" src="https://github.com/user-attachments/assets/81f6c022-44b2-471e-a4da-09747d50cdf1" />
 
 &nbsp;
 &nbsp;
