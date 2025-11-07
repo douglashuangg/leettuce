@@ -63,6 +63,11 @@ async function autoSync() {
 }
 
 function applyColors() {
+  // Don't color on problem pages (only on problemset and study-plan pages)
+  if (window.location.href.includes('/problems/') && !window.location.href.includes('/problemset/')) {
+    return;
+  }
+  
   if (problemData.length === 0) return;
   
   const problemMap = new Map();
